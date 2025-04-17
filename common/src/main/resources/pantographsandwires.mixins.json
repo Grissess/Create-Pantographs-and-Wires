@@ -27,7 +27,8 @@
     "LevelMixin",
     "BlockStateBaseMixin",
     "BlockPlaceContextMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "TrainMixin"
   ],
   "injectors": {
     "defaultRequire": 1
