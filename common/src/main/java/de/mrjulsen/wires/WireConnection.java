@@ -4,11 +4,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.joml.Vector3f;
+
 import com.google.common.collect.Multimap;
 
-import de.mrjulsen.paw.PantographsAndWires;
 import de.mrjulsen.wires.block.IWireConnector;
 import de.mrjulsen.wires.network.WireConnectionSyncData;
+import de.mrjulsen.wires.util.Utils;
 import de.mrjulsen.mcdragonlib.data.Cache;
 import de.mrjulsen.mcdragonlib.util.DLUtils;
 import net.minecraft.core.BlockPos;
@@ -16,8 +18,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 public class WireConnection {
 
@@ -68,7 +68,7 @@ public class WireConnection {
     }
 
     public static Optional<WireConnection> fromNbt(CompoundTag nbt) {
-        ResourceLocation wireTypeId = new ResourceLocation(nbt.getString(NBT_WIRE_TYPE));
+        ResourceLocation wireTypeId = Utils.resLoc(nbt.getString(NBT_WIRE_TYPE));
         if (WireTypeRegistry.has(wireTypeId)) {
             return Optional.of(new WireConnection(
                 nbt.getUUID(NBT_ID),
@@ -83,17 +83,17 @@ public class WireConnection {
         return Optional.empty();        
     }
 
-    public boolean recalcAttachPoints(Level level, Multimap<ChunkPos, WireCollision> chunkMap, Multimap<SectionPos, WireCollision> sectionMap, Multimap<BlockPos, WireCollision> blockMap) {
+    public boolean recalcAttachPoints(WireNetwork network, Multimap<ChunkPos, WireCollision> chunkMap, Multimap<SectionPos, WireCollision> sectionMap, Multimap<BlockPos, WireCollision> blockMap) {
         boolean hasChanged = false;
-        if (level.isLoaded(getPointA()) && level.getBlockState(getPointA()).getBlock() instanceof IWireConnector c) {
-            CompoundTag connectorData = c.wireRenderData(level, getPointA(), level.getBlockState(getPointA()), getCreationDataContext(), true);
+        if (network.level().isLoaded(getPointA()) && network.level().getBlockState(getPointA()).getBlock() instanceof IWireConnector c) {
+            CompoundTag connectorData = c.wireRenderData(network.level(), getPointA(), network.level().getBlockState(getPointA()), getCreationDataContext(), true);
             if (!connectionANbt.equals(connectorData)) {
                 this.connectionANbt = connectorData;
                 hasChanged = true;
             }
         }
-        if (level.isLoaded(getPointB()) && level.getBlockState(getPointB()).getBlock() instanceof IWireConnector c) {
-            CompoundTag connectorData = c.wireRenderData(level, getPointB(), level.getBlockState(getPointB()), getCreationDataContext(), false);
+        if (network.level().isLoaded(getPointB()) && network.level().getBlockState(getPointB()).getBlock() instanceof IWireConnector c) {
+            CompoundTag connectorData = c.wireRenderData(network.level(), getPointB(), network.level().getBlockState(getPointB()), getCreationDataContext(), false);
             if (!connectionBNbt.equals(connectorData)) {
                 this.connectionBNbt = connectorData;
                 hasChanged = true;
@@ -101,10 +101,10 @@ public class WireConnection {
         }
         if (!hasChanged) return false;
         WireConnectionSyncData sync = WireConnectionSyncData.of(this);
-        WireCollision collision = new WireCollision(chunkMap, sectionMap, blockMap, this.getId(), getPointA(), getWireType().buildWire(WireCreationContext.COLLISION, level, sync).getCollisions());
+        WireCollision collision = new WireCollision(chunkMap, sectionMap, blockMap, this.getId(), getPointA(), getWireType().buildWire(WireCreationContext.COLLISION, network.level(), sync).getCollisions());
         setCollisionData(collision);
         setWireConnectionSyncData(sync);
-        PantographsAndWires.LOGGER.warn("A wire was misaligned! Data has been corrected. ID: {}, PointA: {}, PointB: {}", id, pointA, pointB);
+        WiresApi.LOGGER.warn("A wire was misaligned! Data has been corrected. ID: {}, PointA: {}, PointB: {}", id, pointA, pointB);
         return true; 
     }
 
@@ -157,17 +157,17 @@ public class WireConnection {
         return SectionPos.of(pointA);
     }
     
-    public Vec3 getRelativeStart() {
+    public Vector3f getRelativeStart() {
         return calcRelative(pointA);
     }
 
-    public Vec3 getRelativeEnd() {  
+    public Vector3f getRelativeEnd() {  
         return calcRelative(pointB);
     }
 
-    public Vec3 calcRelative(BlockPos pos) {  
+    public Vector3f calcRelative(BlockPos pos) {  
         BlockPos sectionPos = originChunkSection().origin();
-        return new Vec3(
+        return new Vector3f(
             pos.getX() - sectionPos.getX(),
             pos.getY() - sectionPos.getY(),
             pos.getZ() - sectionPos.getZ()

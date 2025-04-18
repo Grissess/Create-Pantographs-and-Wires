@@ -4,10 +4,12 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.mrjulsen.mcdragonlib.data.Cache;
-import de.mrjulsen.paw.PantographsAndWires;
 import de.mrjulsen.paw.mixin.client.RenderChunkAccess;
-import de.mrjulsen.paw.util.CompiledChunkExtension;
 import de.mrjulsen.wires.WireClientNetwork;
+import de.mrjulsen.wires.WiresApi;
+import de.mrjulsen.wires.util.ClientUtils;
+import de.mrjulsen.wires.util.CompiledChunkExtension;
+import de.mrjulsen.wires.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.RenderType;
@@ -15,7 +17,6 @@ import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.RenderChunk;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -31,7 +32,7 @@ public class WireRenderer implements ResourceManagerReloadListener {
 	public static final Cache<TextureAtlasSprite> WIRE_TEXTURE = new Cache<>(
 		() -> Minecraft.getInstance().getModelManager()
 			.getAtlas(InventoryMenu.BLOCK_ATLAS)
-			.getSprite(new ResourceLocation(PantographsAndWires.MOD_ID, "block/wire"))
+			.getSprite(Utils.resLoc(WiresApi.MOD_ID, "block/wire"))
 	);
 
 	@Override
@@ -42,7 +43,7 @@ public class WireRenderer implements ResourceManagerReloadListener {
 	public static void renderConnectionsInSection(Set<RenderType> layers, ChunkBufferBuilderPack buffers, BlockAndTintGetter region, RenderChunk renderChunk) {
 		BlockPos chunkOrigin = renderChunk.getOrigin();
 		SectionPos chunkSection = SectionPos.of(chunkOrigin);
-		if (!WireClientNetwork.hasConnectionsInSection(chunkSection)) {
+		if (!WireClientNetwork.get(ClientUtils.level()).hasConnectionsInSection(chunkSection)) {
 			return;
 		}
 
@@ -59,7 +60,7 @@ public class WireRenderer implements ResourceManagerReloadListener {
 	}
 
 	public static void renderConnectionsInSection(Function<RenderType, VertexConsumer> layers, me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers buffers, BlockAndTintGetter region, SectionPos section) {
-		if (!WireClientNetwork.hasConnectionsInSection(section)) {
+		if (!WireClientNetwork.get(ClientUtils.level()).hasConnectionsInSection(section)) {
 			return;
 		}
 		RenderType renderType = RenderType.solid();
@@ -68,7 +69,7 @@ public class WireRenderer implements ResourceManagerReloadListener {
 	}
 
 	private static void renderConnectionsInternal(VertexConsumer vertexConsumer, BlockAndTintGetter region, SectionPos section, PoseStack poseStack) {
-		Collection<WireSegmentRenderDataBatch> connections = WireClientNetwork.connectionsInSection(section);
+		Collection<WireSegmentRenderDataBatch> connections = WireClientNetwork.get(ClientUtils.level()).connectionsInSection(section);
 
 		for (WireSegmentRenderDataBatch connection : connections) {
 			connection.render(vertexConsumer);

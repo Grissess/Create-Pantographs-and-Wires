@@ -1,6 +1,5 @@
 package de.mrjulsen.wires.block;
 
-import de.mrjulsen.paw.blockentity.IBlockEntityExtension;
 import de.mrjulsen.wires.WireNetwork;
 import de.mrjulsen.mcdragonlib.block.SyncedBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -34,7 +33,7 @@ public class WireConnectorBlockEntity extends SyncedBlockEntity implements IBloc
 	public void setRemoved() {
 		super.setRemoved();
         if (!wasUnloaded() && !level.isClientSide) {            
-            WireNetwork.removeConnector(getLevel(), getBlockPos());
+            WireNetwork.get(level).removeConnector(getLevel(), getBlockPos());
         }
         wasUnloaded = false;
 	} 
