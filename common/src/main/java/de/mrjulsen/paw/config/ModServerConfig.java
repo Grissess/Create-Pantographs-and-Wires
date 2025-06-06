@@ -14,7 +14,9 @@ public class ModServerConfig {
     public static final ForgeConfigSpec.ConfigValue<Double> WIRE_COLLISION_TRACER_STEP_SIZE;
     public static final ForgeConfigSpec.ConfigValue<Boolean> BLOCKS_BREAK_WIRES;
     public static final ForgeConfigSpec.ConfigValue<Boolean> WIRE_ENTITY_DAMAGE;
-    public static final ForgeConfigSpec.ConfigValue<Double> boost_multiplier;
+    public static final ForgeConfigSpec.ConfigValue<Double> max_boosted_speed;
+    public static final ForgeConfigSpec.ConfigValue<Double> max_boosted_turn_speed;
+    public static final ForgeConfigSpec.ConfigValue<Double> max_boosted_acceleration;
     public static final ForgeConfigSpec.ConfigValue<Boolean> realistic_pantograph;
     static {
         BUILDER.push(PantographsAndWires.MOD_ID + "_common_config");
@@ -28,8 +30,12 @@ public class ModServerConfig {
         WIRE_ENTITY_DAMAGE = BUILDER.comment(new String[] {"Whether powered wires should cause damage to entities touching them.", "Default: true"})
             .define("wires.wire_entity_damage", true);
 
-        boost_multiplier = BUILDER.comment(new String[] {"[in Blocks]", "The multiplier for speed.", "Default: 2"})
-                .defineInRange("wires.boost_multiplier", 2f, 2f, 4f);
+        max_boosted_speed = BUILDER.comment(new String[] {"[in Blocks/Second]", "The top speed of electrically powered Trains.", "Default: 60"})
+                .defineInRange("wires.boost_multiplier", 60f, 0f, 140f);
+        max_boosted_turn_speed = BUILDER.comment(new String[] {"[in Blocks/Second]", "The top speed of powered electrically Trains during a turn.", "Default: 50"})
+                .defineInRange("wires.boost_multiplier", 50f, 0f, 140f);
+        max_boosted_acceleration = BUILDER.comment(new String[] {"[in Blocks/Second²]", "The acceleration of electrically powered Trains.", "Default: 4"})
+                .defineInRange("wires.boost_multiplier", 4f, 0f, 20f);
 
         realistic_pantograph = BUILDER.comment(new String[] {"Whether a train will stop moving if power is lost", "Default: true"})
                 .define("wires.realistic_pantograph", true);
