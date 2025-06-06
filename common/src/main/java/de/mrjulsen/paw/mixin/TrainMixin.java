@@ -32,7 +32,7 @@ public class TrainMixin implements TrainExtension {
     		cir.setReturnValue(cir.getReturnValue() * pantographBoost);
     }
 
-    @Inject(method = "acceleration", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "acceleration", at = @At("RETURN"), cancellable = true)
     public void acceleration(CallbackInfoReturnable<Float> cir) {
     	if(pantographIsConnected)
     		cir.setReturnValue(cir.getReturnValue() * pantographBoost * pantographBoost);

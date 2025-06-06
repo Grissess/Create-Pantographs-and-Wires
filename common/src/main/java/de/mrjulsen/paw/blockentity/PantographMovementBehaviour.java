@@ -12,7 +12,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.phys.Vec3;
-
+import de.mrjulsen.mcdragonlib.DragonLib;
+import de.mrjulsen.paw.network.PacketSetPantoState;
 import de.mrjulsen.paw.util.TrainExtension;
 
 public class PantographMovementBehaviour implements MovementBehaviour {
@@ -23,6 +24,7 @@ public class PantographMovementBehaviour implements MovementBehaviour {
             context.contraption.presentBlockEntities.get(context.localPos) instanceof PantographBlockEntity be
         ) {
         	if(context.contraption.entity.level().isClientSide()) {
+        		boolean oldIsExpanded = be.isExpanded();
             	Direction dir = context.state.getValue(HorizontalDirectionalBlock.FACING);
             	if (dir.getAxis() == Axis.X) {
                 	dir = dir.getOpposite();
@@ -34,11 +36,13 @@ public class PantographMovementBehaviour implements MovementBehaviour {
                 	return new Vector3d(r.x(), r.y(), r.z());
             	});
             	be.contraptionTick();
+				if(context.contraption.entity instanceof CarriageContraptionEntity cce &&
+						oldIsExpanded != be.isExpanded()) {
+					Train train = cce.getCarriage().train;
+					PacketSetPantoState pkt = new PacketSetPantoState(train.id, be.isExpanded());
+					DragonLib.getDragonLibNetworkManager().CHANNEL.sendToServer(pkt);
+				}
             }
-        	if(context.contraption.entity instanceof CarriageContraptionEntity cce) {
-            	TrainExtension train = (TrainExtension)cce.getCarriage().train;
-            	train.setPantographConnected(be.isExpandable());
-        	}
         }
 	}
 
