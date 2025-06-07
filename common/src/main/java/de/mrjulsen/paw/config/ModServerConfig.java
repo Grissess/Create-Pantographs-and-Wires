@@ -31,11 +31,11 @@ public class ModServerConfig {
             .define("wires.wire_entity_damage", true);
 
         max_boosted_speed = BUILDER.comment(new String[] {"[in Blocks/Second]", "The top speed of electrically powered Trains.", "Default: 60"})
-                .defineInRange("wires.boost_multiplier", 60f, 0f, 140f);
+                .defineInRange("wires.max_boosted_speed", 60f, 0f, 140f);
         max_boosted_turn_speed = BUILDER.comment(new String[] {"[in Blocks/Second]", "The top speed of powered electrically Trains during a turn.", "Default: 50"})
-                .defineInRange("wires.boost_multiplier", 50f, 0f, 140f);
+                .defineInRange("wires.max_boosted_turn_speed", 50f, 0f, 140f);
         max_boosted_acceleration = BUILDER.comment(new String[] {"[in Blocks/Second²]", "The acceleration of electrically powered Trains.", "Default: 4"})
-                .defineInRange("wires.boost_multiplier", 4f, 0f, 20f);
+                .defineInRange("wires.max_boosted_acceleration", 4f, 0f, 20f);
 
         realistic_pantograph = BUILDER.comment(new String[] {"Whether a train will stop moving if power is lost", "Default: true"})
                 .define("wires.realistic_pantograph", true);
